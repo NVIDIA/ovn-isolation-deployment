@@ -1,0 +1,18 @@
+[Unit]
+Description=OVN Domain Isolation Service
+Requires=docker.service ovn-central.service postgres-db.service
+After=docker.service ovn-central.service postgres-db.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+RestartSec=10
+ExecStartPre=-docker stop %n
+ExecStartPre=-docker rm %n
+ExecStartPre=docker pull {{ ovn_domain_service_image }}
+# The OVNNB_ENDPOINT=tcp:127.0.0.1:6641 specifies the endpoint for connecting to the OVN Northbound Database, which is accessible on the local host (127.0.0.1) via port 6641
+ExecStart=docker run --name %n -i --network=host -e DB_HOST=127.0.0.1 -e IP_ADDRESS_POOL="{{ internal_ip_address_pool }}" -e OVNNB_ENDPOINT=tcp:127.0.0.1:6641 {{ ovn_domain_service_image }}
+ExecStop=docker stop %n
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,43 @@
+---
+- name: Log into private registry and force re-authorization
+  docker_login:
+    registry: "{{ docker_registry }}"
+    username: "{{ docker_registry_user }}"
+    password: "{{ docker_registry_pass }}"
+    reauthorize: yes
+
+- name: Copy ovn-central systemd service
+  template:
+    src: ../services/ovn-central.service
+    dest: /etc/systemd/system/ovn-central.service
+
+- name: Start ovn-central systemd service
+  systemd:
+    name: ovn-central.service
+    daemon_reload: yes
+    state: started
+    enabled: yes
+
+- name: Copy postgres-db systemd service
+  template:
+    src: ../services/postgres-db.service
+    dest: /etc/systemd/system/postgres-db.service
+
+- name: Start postgres systemd service
+  systemd:
+    name: postgres-db.service
+    daemon_reload: yes
+    state: started
+    enabled: yes
+
+- name: Copy ovn-domain-isolation systemd service
+  template:
+    src: ../services/ovn-domain-isolation.service
+    dest: /etc/systemd/system/ovn-domain-isolation.service
+
+- name: Start ovn-domain-isolation systemd service
+  systemd:
+    name: ovn-domain-isolation.service
+    daemon_reload: yes
+    state: started
+    enabled: yes

@@ -1,0 +1,17 @@
+[Unit]
+Description=OVN Controller Container Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+RestartSec=10
+ExecStartPre=-docker stop %n
+ExecStartPre=-docker rm %n
+ExecStartPre=docker pull {{ ovn_controller_image }}
+ExecStart=docker run --name %n -i --privileged -v /var/run/openvswitch:/var/run/openvswitch -v /var/run/ovn:/var/run/ovn {{ ovn_controller_image }}
+ExecStop=docker stop %n
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,3 @@
+- name: Set VFs Mac Addresses
+  ansible.builtin.shell: ip link set dev {{ item.0 }} address {{ item.1 }}
+  loop: "{{ vfs.split(',') | zip(mac_addresses.split(',')) | list }}"

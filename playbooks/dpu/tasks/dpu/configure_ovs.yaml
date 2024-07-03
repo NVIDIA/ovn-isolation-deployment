@@ -1,0 +1,129 @@
+---
+- name: Disable creation of default OVS bridges
+  ansible.builtin.replace:
+    path: /etc/mellanox/mlnx-ovs.conf
+    regexp: 'CREATE_OVS_BRIDGES="yes"'
+    replace: 'CREATE_OVS_BRIDGES="no"'
+
+
+- name : Check Firmware FLEX_PARSER_ENABLE is 8
+  ansible.builtin.shell: test "$(mlxconfig -d /dev/mst/mt41686_pciconf0 q | grep FLEX_PARSER_PROFILE_ENABLE | tr -s ' ' | cut -d " " -f 3)" -eq 8
+
+
+- name: Create/delete OVS bridges
+  openvswitch.openvswitch.openvswitch_bridge: bridge="{{item.name}}" state="{{item.state}}" timeout={{ovs_timeout}}
+  loop:
+    - { name: "ovsbr1",           state: "absent" }
+    - { name: "ovsbr2",           state: "absent" }
+    - { name: "{{bridge_name}}",  state: "present" }
+
+
+# OVS-DOCA specific
+
+- name : Set huge pages
+  ansible.builtin.shell: echo {{ hugepages_count }} > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+- name: Get uplink PCI
+  ansible.builtin.shell: basename $(readlink -f $(readlink -f /sys/class/net/{{uplink_name}})/../..)
+  register: uplink_pci
+
+- name: Define other_config items (OVS-DOCA)
+  set_fact:
+    other_config_items:
+      - { key: "dpdk-extra", value: "'-a 0000:00:00.0'" }
+      - { key: "dpdk-init", value: "true" }
+      - { key: "doca-init", value: "true" }
+      - { key: "hw-offload", value: "true" }
+    ports_list:
+      - { bridge: "{{bridge_name}}",  port: "{{uplink_name}}",  extra: "{{uplink_pci.stdout}},dv_xmeta_en=4,dv_flow_en=2" }
+
+
+- name: Initialize ovs-doca and add ports to bridges
+  block:
+  - name: Set other_config
+    openvswitch.openvswitch.openvswitch_db: table=Open_vSwitch record=.  col=other_config key="{{item.key}}" value="{{item.value}}" timeout={{ovs_timeout}}
+    loop: '{{other_config_items}}'
+    register: result
+    loop_control:
+      pause: 5
+
+  - name: Restart OVS
+    ansible.builtin.systemd: name=openvswitch-switch state=restarted
+
+  - name: Pause for 5 seconds
+    ansible.builtin.pause:    seconds=5
+
+  - name: Add uplink ports
+    ansible.builtin.shell: ovs-vsctl --timeout={{ovs_timeout}} --may-exist add-port {{item.bridge}} {{item.port}} -- set Interface {{item.port}} type=dpdk options:dpdk-devargs='{{item.extra}}'
+    loop: '{{ports_list}}'
+    register: result
+    loop_control:
+      pause: 5
+
+- name: Set OVS datapath type
+  openvswitch.openvswitch.openvswitch_db: table=Bridge record="{{item}}" col=datapath_type value="{{ovs_datapath_type}}" timeout={{ovs_timeout}}
+  loop:
+    - "{{bridge_name}}"
+
+- name: Set external_ids-ovn-bridge-datapath-type
+  openvswitch.openvswitch.openvswitch_db: table=open_vswitch record=.  col=external_ids key=ovn-bridge-datapath-type value="{{ovs_datapath_type}}" timeout={{ovs_timeout}}
+
+- name: Bridge and port configuration
+  block:
+  - name: Set encap IP on bridge
+    ansible.builtin.shell: |
+      ip_address=$(ip addr show dev {{bridge_name}} | awk '/inet /{print $2}')
+      if ["$ip_address" eq ""] || ["$ip_address" != {{encap_ip}}]; then
+        ip addr add {{encap_ip}} dev {{bridge_name}}
+      fi
+
+  - name: Set bridge up
+    ansible.builtin.shell: ip link set dev {{bridge_name}} up
+
+  - name: Set uplink port MTU
+    ansible.builtin.shell: ip link set dev {{uplink_name}} mtu {{mtu}}
+
+  - name: Set bridge MTU
+    openvswitch.openvswitch.openvswitch_db: table="{{item.table}}" record="{{item.record}}" col="{{item.col}}" value="{{item.value}}" timeout={{ovs_timeout}}
+    loop:
+    - { table: "Int",   record: "{{bridge_name}}",  col: "mtu_request", value: "{{mtu}}" }
+
+
+- name: Set external ids
+  openvswitch.openvswitch.openvswitch_db: table=open_vswitch record=.  col=external_ids key="{{item.key}}" value="{{item.value}}" timeout={{ovs_timeout}}
+  loop:
+      - { key: "hostname", value: "{{ovn_hostname}}" }
+      - { key: "ovn-remote", value: "tcp:{{ovn_sb_db_ip}}:6642" }
+      - { key: "ovn-encap-type", value: "geneve" }
+      - { key: "ovn-encap-ip", value: "{{encap_ip[:-3]}}" }  # Strip the last 3 chars to get the ip alone without mask.
+      - { key: "ovn-bridge-mappings", value: "{{ovn_bridge_mappings}}" }
+      - { key: "ovn-bridge-datapath-type", value: "{{ovs_datapath_type}}" }
+  register: result
+
+- name: Pause for 5 seconds
+  ansible.builtin.pause:    seconds=5
+
+# Start ovn controller
+
+- name: Install Docker Module for Python
+  pip:
+    name: docker
+
+- name: Log into private registry and force re-authorization
+  docker_login:
+    registry: "{{ docker_registry }}"
+    username: "{{ docker_registry_user }}"
+    password: "{{ docker_registry_pass }}"
+    reauthorize: yes
+
+- name: Copy systemd service
+  template:
+    src: ../../services/ovn-controller.service
+    dest: /etc/systemd/system/ovn-controller.service
+
+- name: Start systemd service
+  systemd:
+    name: ovn-controller.service
+    daemon_reload: yes
+    state: started
+    enabled: yes

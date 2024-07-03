@@ -1,0 +1,18 @@
+[Unit]
+Description=Postgres Database Container Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+RestartSec=10
+ExecStartPre=-docker stop %n
+ExecStartPre=-docker rm %n
+ExecStartPre=docker pull postgres
+# The Postgres image exposes port 5432 for establishing connections to the database
+ExecStart=docker run --name %n -i -p 5432:5432 -e PGUSER=postgres -e POSTGRES_PASSWORD=mysecretpassword -v {{ ovn_persistency_data }}:/etc/ovn postgres
+ExecStop=docker stop %n
+
+[Install]
+WantedBy=multi-user.target

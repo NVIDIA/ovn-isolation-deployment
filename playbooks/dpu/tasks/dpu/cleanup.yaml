@@ -1,0 +1,11 @@
+---
+- name: Stop systemd service
+  systemd:
+    name: ovn-controller.service
+    state: stopped
+
+- name: delete OVS bridges
+  openvswitch.openvswitch.openvswitch_bridge: bridge="{{item.name}}" state="{{item.state}}" timeout={{ovs_timeout}}
+  loop:
+    - { name: "br-int",           state: "absent" }
+    - { name: "{{bridge_name}}",  state: "absent" }

@@ -1,0 +1,3 @@
+---
+- name: Reset SRIOV VFs
+  ansible.builtin.shell: echo 0 > /sys/class/net/{{ uplink }}/device/sriov_numvfs

@@ -1,0 +1,48 @@
+# build stage
+FROM nvcr.io/nvidia/base/ubuntu:22.04_20240212 AS OVN_BUILD
+RUN apt-get update && \
+  apt-get install -yq --no-install-recommends \
+  autoconf \
+  automake \
+  gcc \
+  git \
+  libtool \
+  make \
+  openssh-client \
+  libssl-dev \
+  openssl \
+  python3 \
+  curl \
+  --reinstall ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+ARG OVN_REPO="https://github.com/ovn-org/ovn.git"
+ARG OVN_TAG="v24.03.2"
+
+#increases th Git buffer size to 500 MB, needed for latest versions
+RUN git config --global http.postBuffer 524288000
+RUN git clone -b $OVN_TAG -c advice.detachedHead=false --single-branch $OVN_REPO
+
+RUN cd /ovn && \
+    rm -rf ./ovs && \
+    git submodule update --init --depth 1 && \
+    cd ./ovs && \
+    ./boot.sh && \
+    ./configure --localstatedir="/var" --sysconfdir="/etc" --prefix="/usr" \
+    --disable-libcapng --enable-Werror CFLAGS="${cflags}" && \
+    make -j$(($(nproc) - 1)) V=0 && \
+    cd /ovn && \
+    ./boot.sh && \
+    ./configure --localstatedir="/var" --sysconfdir="/etc" --prefix="/usr" CFLAGS="${cflags}" && \
+    make -j$(($(nproc) - 1)) V=0 && \
+    make install
+
+# ovn-controller run stage
+
+FROM nvcr.io/nvidia/base/ubuntu:22.04_20240212
+
+COPY --from=OVN_BUILD /usr/bin/ovn-controller /usr/bin
+
+CMD ["ovn-controller", "--pidfile", "--log-file=/var/log/ovn/ovn-controller.log"]
+
+VOLUME ["/var/run/openvswitch", "/var/run/ovn", "/var/log/ovn"]

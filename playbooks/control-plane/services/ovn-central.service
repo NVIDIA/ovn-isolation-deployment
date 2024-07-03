@@ -1,0 +1,18 @@
+[Unit]
+Description=OVN Central Container Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+RestartSec=10
+ExecStartPre=-docker stop %n
+ExecStartPre=-docker rm %n
+ExecStartPre=docker pull {{ ovn_central_image }}
+# The ovn-central image exposes port 6641 for communication with the Northbound database and port 6642 for communication with the Southbound database
+ExecStart=docker run --name %n -i --privileged -p 6641:6641 -p 6642:6642 -v {{ ovn_persistency_data }}:/etc/ovn {{ ovn_central_image }}
+ExecStop=docker stop %n
+
+[Install]
+WantedBy=multi-user.target

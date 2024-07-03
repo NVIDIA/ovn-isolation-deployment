@@ -1,0 +1,48 @@
+[all:vars]
+docker_registry=nvcr.io
+docker_registry_user=<registry_user>
+docker_registry_pass=<registry_pass>
+
+[control_plane]
+<control_plane_host_name_or_ip>
+
+[control_plane:vars]
+ansible_python_interpreter=/usr/bin/python3
+ovn_domain_service_image=nvcr.io/cjlqyxpwuczn/ovn_orchestration/ovn-domain-service:latest
+ovn_central_image=<ovn_central_image>
+ovn_persistency_data=/etc/ovn
+postgress_persistency_data=/var/lib/postgresql/data
+internal_ip_address_pool="100.64.0.0/16,100.65.0.0/16,100.66.0.0/16,100.67.0.0/16,100.68.0.0/16,100.69.0.0/16,100.70.0.0/16"
+
+[compute]
+<first_host_name_or_ip> vfs=pf0vf0,pf0vf1 mac_addresses="40:44:00:00:00:01","40:44:00:00:00:02"
+<second_host_name_or_ip> vfs=pf0vf0,pf0vf1 mac_addresses="40:44:00:00:00:03","40:44:00:00:00:04"
+
+[compute:vars]
+ansible_python_interpreter=/usr/libexec/platform-python
+
+num_vfs=4
+uplink=p0
+
+[dpu]
+<first_dpu_host_name_or_ip>  encap_ip=20.0.0.1/24 ovn_hostname=bf1 vf_representors=pf0vf0_r,pf0vf1_r external_interface_ids=bf1pf0vf0,bf1pf0vf1
+<second_dpu_host_name_or_ip>  encap_ip=20.0.0.2/24 ovn_hostname=bf2 vf_representors=pf0vf0_r external_interface_ids=bf2pf0vf0
+
+[dpu:vars]
+ovn_controller_image=<ovn_controller_image>
+
+ovn_sb_db_ip=<control_plane_host_ip>
+
+ansible_python_interpreter=/usr/bin/python3
+
+uplink_name=p0
+bridge_name=br{{uplink_name}}
+
+
+ovs_timeout=30
+ovs_datapath_type=netdev
+mtu=9216
+
+hugepages_count=1536
+
+ovn_bridge_mappings=physnet:{{bridge_name}}

@@ -1,0 +1,12 @@
+---
+- name: Host setup
+  hosts: compute
+  gather_facts: no
+  tasks:
+  - include_tasks: tasks/compute/cleanup.yaml
+
+- name: BF setup
+  hosts: dpu
+  gather_facts: no
+  tasks:
+  - include_tasks: tasks/dpu/cleanup.yaml

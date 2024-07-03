@@ -1,0 +1,8 @@
+---
+- name: cleanup control plane
+  hosts: control_plane
+  remote_user: root
+  gather_facts: no
+  tasks:
+  - include_tasks: tasks/install-dependencies.yaml
+  - include_tasks: tasks/cleanup.yaml

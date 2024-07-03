@@ -1,0 +1,11 @@
+---
+- name: upgrade pip3
+  ansible.builtin.pip:
+    name: pip
+    state: latest
+    executable: pip3
+
+- name: install docker
+  ansible.builtin.pip:
+    name: docker
+    executable: pip3

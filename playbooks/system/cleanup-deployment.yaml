@@ -1,0 +1,3 @@
+---
+- ansible.builtin.import_playbook: ../control-plane/cleanup-deployment.yaml
+- ansible.builtin.import_playbook: ../dpu/cleanup-deployment.yaml

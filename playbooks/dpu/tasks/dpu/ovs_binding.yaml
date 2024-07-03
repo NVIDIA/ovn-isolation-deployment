@@ -1,0 +1,23 @@
+---
+- name: Attatch OVS ports to br-int and bind interfaces to OVN
+  block:
+  - name: Set VF representor up
+    ansible.builtin.shell: ip link set dev {{ item }} up
+    loop: "{{ vf_representors.split(',') }}"
+
+  - name: Pause for 15 seconds
+    ansible.builtin.pause:    seconds=15
+
+  - name: Connect Port to OVS Bridge br-int
+    openvswitch.openvswitch.openvswitch_port:
+      bridge: br-int
+      port: '{{item.0}}'
+      state: present
+      set:
+        - Interface '{{item.0}}' external_ids:"iface-id={{ item.1 }}"
+        - Interface '{{item.0}}' type=dpdk
+        - Interface '{{item.0}}' options:"dpdk-devargs=0000:03:00.0,representor=vf[{{ idx }}],dv_xmeta_en=4,dv_flow_en=2"
+      timeout: '{{ovs_timeout}}'
+    loop: "{{ vf_representors.split(',') | zip(external_interface_ids.split(',')) | list }}"
+    loop_control:
+      index_var: idx

@@ -1,0 +1,17 @@
+---
+- name: Host setup
+  remote_user: root
+  hosts: compute
+  gather_facts: no
+  tasks:
+  - include_tasks: tasks/compute/main.yaml
+  - include_tasks: tasks/compute/configure_vfs.yaml
+
+- name: BF setup
+  remote_user: root
+  hosts: dpu
+  gather_facts: no
+  tasks:
+  - include_tasks: tasks/dpu/main.yaml
+  - include_tasks: tasks/dpu/configure_ovs.yaml
+  - include_tasks: tasks/dpu/ovs_binding.yaml

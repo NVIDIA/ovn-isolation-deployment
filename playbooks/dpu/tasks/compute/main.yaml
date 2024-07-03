@@ -1,0 +1,18 @@
+- name: Ping
+  ansible.builtin.ping:
+
+- name: Create SRIOV VFs
+  ansible.builtin.shell: echo {{ num_vfs }} > /sys/class/net/{{ uplink }}/device/sriov_numvfs
+
+- name : Check vf interfaces
+  ansible.builtin.shell: test "$(ip -br a | grep -E  "pf[0-9]vf" | wc -l)" -eq {{ num_vfs }}
+
+- name : Get all interfaces
+  ansible.builtin.shell: ip -br a
+  register: result
+
+- name: Print return information from the previous task
+  ansible.builtin.debug:
+    var: result.stdout_lines
+
+

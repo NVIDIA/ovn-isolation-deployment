@@ -1,0 +1,47 @@
+---
+- name: Stop ovn-domain-isolation service
+  systemd:
+    name: ovn-domain-isolation.service
+    state: stopped
+    enabled: no
+
+- name: Stop postgres-db service
+  systemd:
+    name: postgres-db.service
+    state: stopped
+    enabled: no
+
+- name: Stop ovn-central service
+  systemd:
+    name: ovn-central.service
+    state: stopped
+    enabled: no
+
+- name: Remove ovn domain isolation service unit file
+  file:
+    path: /etc/systemd/system/ovn-domain-isolation.service
+    state: absent
+
+- name: Remove postgres-db service unit file
+  file:
+    path: /etc/systemd/system/postgres-db.service
+    state: absent
+
+- name: Remove ovn-central service unit file
+  file:
+    path: /etc/systemd/system/ovn-central.service
+    state: absent
+
+- name: Delete database volume
+  file:
+    path: "{{ postgress_persistency_data }}"
+    state: absent
+
+- name: Delete ovn-central volume
+  file:
+    path: "{{ ovn_persistency_data }}"
+    state: absent
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
