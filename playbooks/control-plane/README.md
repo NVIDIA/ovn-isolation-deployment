@@ -7,7 +7,7 @@ Refer to the included hosts file for a sample inventory, where you can configure
 Under the `[control_plane]` section, you need to specify the host where the management will be deployed.
 In the `[control_plane:vars]` section, you must provide the domain isolation service and OVN database (OVNDB) image details. By default, it will use the latest available images.
 Additionally, you need to specify the Docker registry details for the NGC organization. This ensures that the required images can be pulled from the appropriate registry.
-Additionally, you need to build and specify the ovn_central_image for the OVN central component. An example of such an image can be found in the [Dockerfile.ovn-central](TODO add link) file. 
+Additionally, you need to build and specify the ovn_central_image for the OVN central component. An example of such an image can be found in the [Dockerfile.ovn-central](https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/images/Dockerfile.ovn-central) file.
 To ensure data persistence for the OVN and PostgreSQL databases, you can mount host volumes to store their data by configuring `ovn_persistency_data` and `postgress_persistency_data`
 To configure the internal IP address pool for routing between domain network segments, specify the `internal_ip_address_pool` variable with a comma-separated list of IP addresses and their subnet masks.
 

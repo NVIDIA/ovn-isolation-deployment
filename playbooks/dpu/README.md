@@ -48,7 +48,7 @@ In the `[dpu:vars]` section, assign the following variables:
 - ovn_sb_db_ip: ovn south bound database ip ( control plane host ip ) that will be used to connect ovn controller with ovn south bound
 - ovn_bridge_mappings: maps a physical network name (physnet) to a specific OVS bridge
 
-Additionally, you need to build and specify the ovn_central_image for the OVN controller component. An example of such an image can be found in the [Dockerfile.ovn-controller](TODO add link) file. 
+Additionally, you need to build and specify the ovn_central_image for the OVN controller component. An example of such an image can be found in the [Dockerfile.ovn-controller](https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/images/Dockerfile.ovn-controller) file.
 
 Run the ansible playbook as follows
 

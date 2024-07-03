@@ -9,7 +9,7 @@ Control-Plane Deployment
 
 **Prerequisites**
 
-for inventory file variables setup refer to `TODO add link <https://gitlab-master.nvidia.com/sdn/ovn-isolation-deployment/-/blob/main/testing/control-plane/README.md?ref_type=heads>`__
+for inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/control-plane/inventory>`__
 
 
 **Deployment**
@@ -44,7 +44,7 @@ Compute Node Deployment (x86 Host)
 
 **Prerequisites**
 
-for inventory file variables setup refer to `TODO add link <https://gitlab-master.nvidia.com/sdn/ovn-isolation-deployment/-/blob/main/testing/dpu/inventory?ref_type=heads>`__
+for inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/dpu/inventory>`__
 
 
 **Deployment**
@@ -57,7 +57,7 @@ DPU node deployment
 
 **Prerequisites**
 
-for inventory file variables setup refer to `TODO add link <https://gitlab-master.nvidia.com/sdn/ovn-isolation-deployment/-/blob/main/testing/dpu/inventory?ref_type=heads>`__
+for inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/dpu/inventory>`__
 
 
 **Deployment**
