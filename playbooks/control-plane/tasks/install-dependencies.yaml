@@ -24,3 +24,9 @@
   ansible.builtin.pip:
     name: docker
     executable: pip3
+
+- name: Ensure Docker service is running
+  systemd:
+    name: docker
+    state: started
+    enabled: yes

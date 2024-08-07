@@ -9,7 +9,7 @@ Control-Plane Deployment
 
 **Prerequisites**
 
-for inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/control-plane/inventory>`__
+For inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/control-plane/inventory>`__
 
 
 **Deployment**
@@ -44,7 +44,7 @@ Compute Node Deployment (x86 Host)
 
 **Prerequisites**
 
-for inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/dpu/inventory>`__
+For inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/dpu/inventory>`__
 
 
 **Deployment**
@@ -57,12 +57,12 @@ DPU node deployment
 
 **Prerequisites**
 
-for inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/dpu/inventory>`__
+For inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn-isolation-deployment/blob/master/playbooks/dpu/inventory>`__
 
 
 **Deployment**
 
-This deployment will configure Open vSwitch (OVS) to be based on DOCA using DPDK (Data Plane Development Kit) and enabling hardware offload capabilities. Ensure that the FLEX_PARSER_ENABLE parameter is set to 8 to enable flexible parser functionality. Additionally, it will:
+This deployment will configure Open vSwitch (OVS) to be based on DOCA using DPDK (Data Plane Development Kit) and enabling hardware offload capabilities. DOCA version must be at least 8 to support this solution. Ensure that the FLEX_PARSER_ENABLE parameter is set to 8 to enable flexible parser functionality. Additionally, it will:
 
 - Set the Number of Huge Pages
 
@@ -89,3 +89,46 @@ This deployment will configure Open vSwitch (OVS) to be based on DOCA using DPDK
     Optionally, bind interface representors to the `br-int` bridge for direct communication between VMs and the physical network.
 
     This comprehensive configuration ensures optimal performance, hardware offload support, and seamless integration of OVS with the OVN controller for software-defined networking capabilities.
+
+
+Troubleshooting
+----------------------
+
+**DPU Deployment Issues**
+
+- Check Firmware `FLEX_PARSER_ENABLE` - Failed
+
+    If FLEX_PARSER_ENABLE is not set to 8, the check will fail. The flag can be set manually using the command: 'mlxconfig -d /dev/mst/mt41686_pciconf0 set FLEX_PARSER_PROFILE_ENABLE=8'. After resetting the flag the DPU must be rebooted so that the FW change takes effect.
+
+- Error while fetching server API version: Not supported URL scheme http+docker
+    
+    Requests (python package) has a bug with the latest versions (later than 2.32.0). See here for more details: https://github.com/docker/docker-py/issues/3256
+    To solve the problem downgrade the requests package by running this command on the dpu: 'pip install requests==2.31.0'
+
+**Connectivity Issues**
+
+Here are a few things that should be checked when experiencing commectivity issues.
+
+- Supported DOCA version
+
+    For this sulotion we will need DOCA version 8 or higher, ensure supported version using the command 'ovs-vsctl list Open_vSwitch . | grep doca_version'
+    If DOCA version is unsuported, reinstall the BF with a new BFB. The command from the host machine is:
+	'bfb-install -r <rshim number> -b <bfb image> -c <config options if any>'
+
+- vf and vf representors mismatch
+
+    Check which pci device used by vf and matching vf_rep by using the command 'ip -d link show eth4/pf0vf0'
+	If there is a mismatch, see which interfaces are physical using 'mst status -v' 
+    Adjust inventory so that physical interfaces are not used.
+
+- OVS interface external id configuration
+
+    We need to match the InterfaceConfig endpoint name with the external_ids of the OVS interface that uses this endpoint. 
+    Therefore, we should ensure that the OVS interface's external ID is the same as the InterfaceConfig name. 
+    This can be done by setting the interface's external IDs with the following command: 
+    'ovs-vsctl set Interface <interface-name> external_ids:iface-id=bf1pf0vf0'
+
+- Detect host/DPU uplink interface 
+
+    Check which are the psychical interface and choose the lower of the two:
+	'mst status -v'
