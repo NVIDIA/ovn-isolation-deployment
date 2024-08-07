@@ -124,6 +124,12 @@
   pip:
     name: docker
 
+- name: Ensure Docker service is running
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+    
 - name: Log into private registry and force re-authorization
   docker_login:
     registry: "{{ docker_registry }}"

@@ -15,12 +15,14 @@
 
 ---
 - name: Host setup
+  remote_user: root
   hosts: compute
   gather_facts: no
   tasks:
   - include_tasks: tasks/compute/cleanup.yaml
 
 - name: BF setup
+  remote_user: root
   hosts: dpu
   gather_facts: no
   tasks:

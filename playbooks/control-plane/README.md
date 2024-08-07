@@ -1,4 +1,4 @@
-# setup
+# Setup
 
 Before proceeding, ensure that you have access to the remote host where Ansible will execute its modules. This can be accomplished by copying your public key to the authorized keys on the remote host using the following command:
 `ssh-copy-id -i ~/.ssh/id_rsa.pub remote_user@remote_host`
@@ -27,7 +27,7 @@ postgress_persistency_data=/var/lib/postgresql/data
 internal_ip_address_pool="100.64.0.0/16,100.65.0.0/16,100.66.0.0/16,100.67.0.0/16,100.68.0.0/16,100.69.0.0/16,100.70.0.0/16"
 ```
 
-# run
+# Run
 
 ```sh
 ansible-playbook deploy.yaml
@@ -44,9 +44,9 @@ f9fdc590b3d4   nvcr.io/nvstaging/doca/ovn-central:v24.03.2                "/ovnd
 bc92a38cef7c   postgres                                                 "docker-entrypoint.s…"   20 hours ago   Up 20 hours (healthy)
 ```
 
-# cleanup
+# Cleanup
 
-stop all the containers on the management node: ovndb, service and DB containers
+Stop all the containers on the management node: ovndb, service and DB containers
 
 ```sh
 ansible-playbook cleanup-deployment.yaml
