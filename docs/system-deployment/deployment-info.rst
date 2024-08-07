@@ -62,7 +62,7 @@ For inventory file variables setup refer to `link <https://github.com/NVIDIA/ovn
 
 **Deployment**
 
-This deployment will configure Open vSwitch (OVS) to be based on DOCA using DPDK (Data Plane Development Kit) and enabling hardware offload capabilities. DOCA version must be at least 2.8 to support this solution. Ensure that the FLEX_PARSER_ENABLE parameter is set to 8 to enable flexible parser functionality. Additionally, it will:
+This deployment will configure Open vSwitch (OVS) to be based on DOCA using DPDK (Data Plane Development Kit) and enabling hardware offload capabilities. DOCA version must be at least 8 to support this solution. Ensure that the FLEX_PARSER_ENABLE parameter is set to 8 to enable flexible parser functionality. Additionally, it will:
 
 - Set the Number of Huge Pages
 
@@ -111,7 +111,7 @@ Here are a few things that should be checked when experiencing commectivity issu
 
 - Supported DOCA version
 
-    For this sulotion we will need DOCA version 2.8 or higher, ensure supported version using the command 'ovs-vsctl list Open_vSwitch . | grep doca_version'
+    For this sulotion we will need DOCA version 8 or higher, ensure supported version using the command 'ovs-vsctl list Open_vSwitch . | grep doca_version'
     If DOCA version is unsuported, reinstall the BF with a new BFB. The command from the host machine is:
 	'bfb-install -r <rshim number> -b <bfb image> -c <config options if any>'
 
