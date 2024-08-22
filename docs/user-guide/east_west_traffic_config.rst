@@ -19,14 +19,14 @@ VM3 and VM4 are hosted on DPU-B.
 
 The goal is to enable network connectivity and data transfer between VM1 and VM3, VM2 and VM4 using the appropriate API calls.
 
-.. image:: /uploads/c3811a6674021c8ff3c057bf96303ffc/image.png
+.. image:: ../images/east_west_system_arch.png
 
 
 **API diagram to be used**
 
 We will use the following partial API diagram to fulfill all the requirements outlined in the use case.
 
-.. image:: /uploads/420ca085d00d695089429444a55eeca9/image.png
+.. image:: ../images/API_partial_diagram.png
 
 
 Prerequisites
@@ -62,11 +62,11 @@ to fulfill all the requirements outlined in the use case.
 
 - For domain "domain-red" the desired diagram is:
 
-.. image:: /uploads/af0dc6110db166e2dda400fe36d171dc/image.png
+.. image:: ../images/domain_red_ew_diagram.png
 
 - For domain "domain-blue" the desired diagram is:
 
-.. image:: /uploads/7363c8ee352f889c1cc100dcc16207ac/image.png
+.. image:: ../images/domain_blue_ew_diagram.png
 
 **Create two domains: "domain-red" and "domain-blue"**
 
@@ -95,7 +95,7 @@ under "domain-blue"::
 
     grpcurl -plaintext -d '{"name":"ns3", "domain": "domain-blue", "subnet": "10.152.0.0/16"}' ${OVN_DOMAIN_SVC}:5067  ovnisolation.OVNIsolation/CreateNetworkSegment
 
-**Create two DPUs: "DPU-A" and "DPU-B"::**
+**Create two DPUs: "DPU-A" and "DPU-B"**::
 
     grpcurl -plaintext -d '{"name":"DPU-A"}' ${OVN_DOMAIN_SVC}:5067  ovnisolation.OVNIsolation/CreateDPU
     grpcurl -plaintext -d '{"name":"DPU-B"}' ${OVN_DOMAIN_SVC}:5067  ovnisolation.OVNIsolation/CreateDPU
