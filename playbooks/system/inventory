@@ -57,6 +57,7 @@ bridge_name=br{{uplink_name}}
 ovs_timeout=30
 ovs_datapath_type=netdev
 mtu=9216
+ovs_max_idle=10000 #in milliseconds
 
 hugepages_count=1536
 

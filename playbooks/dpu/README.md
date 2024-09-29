@@ -44,6 +44,7 @@ In the `[dpu:vars]` section, assign the following variables:
 - ovs_timeout: ovs add port timeout
 - ovs_datapath_type: bridges datapath types (default: netdev)
 - mtu: uplink mtu
+- ovs_max_idle: determines the maximum time (in milliseconds) that idle flows will remain cached in the datapath before they are expired
 - hugepages_count: number of 2 MB huge pages
 - ovn_sb_db_ip: ovn south bound database ip ( control plane host ip ) that will be used to connect ovn controller with ovn south bound
 - ovn_bridge_mappings: maps a physical network name (physnet) to a specific OVS bridge

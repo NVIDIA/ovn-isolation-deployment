@@ -49,6 +49,7 @@
       - { key: "dpdk-init", value: "true" }
       - { key: "doca-init", value: "true" }
       - { key: "hw-offload", value: "true" }
+      - { key: "max-idle", value: "{{ovs_max_idle}}" }
     ports_list:
       - { bridge: "{{bridge_name}}",  port: "{{uplink_name}}",  extra: "{{uplink_pci.stdout}},dv_xmeta_en=4,dv_flow_en=2" }
 
