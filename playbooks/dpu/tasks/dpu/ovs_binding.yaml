@@ -36,3 +36,14 @@
     loop: "{{ vf_representors.split(',') | zip(external_interface_ids.split(',')) | list }}"
     loop_control:
       index_var: idx
+
+- name: Set MTU request for OVS interfaces
+  openvswitch.openvswitch.openvswitch_db:
+    table: Interface
+    record: "{{ item }}"
+    col: mtu_request
+    value: "{{ mtu }}"
+  loop: "{{ vf_representors.split(',') | map('trim') | list }}"
+
+- name: Restart OVS
+  ansible.builtin.systemd: name=openvswitch-switch state=restarted
