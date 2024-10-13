@@ -76,6 +76,13 @@
     loop_control:
       pause: 5
 
+  - name: Set OVS uplink port MTU
+    openvswitch.openvswitch.openvswitch_db:
+      table: Interface
+      record: "{{uplink_name}}"
+      col: mtu_request
+      value: "{{ mtu }}"
+
 - name: Set OVS datapath type
   openvswitch.openvswitch.openvswitch_db: table=Bridge record="{{item}}" col=datapath_type value="{{ovs_datapath_type}}" timeout={{ovs_timeout}}
   loop:
